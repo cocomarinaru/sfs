@@ -26,10 +26,8 @@
 package km.barsim.handler;
 
 import com.smartfoxserver.v2.SmartFoxServer;
-import com.smartfoxserver.v2.api.APIManager;
 import com.smartfoxserver.v2.api.CreateRoomSettings;
 import com.smartfoxserver.v2.api.ISFSApi;
-import com.smartfoxserver.v2.api.ISFSGameApi;
 import com.smartfoxserver.v2.entities.Room;
 import com.smartfoxserver.v2.entities.User;
 import com.smartfoxserver.v2.entities.Zone;
@@ -38,20 +36,14 @@ import com.smartfoxserver.v2.entities.data.SFSObject;
 import com.smartfoxserver.v2.entities.invitation.Invitation;
 import com.smartfoxserver.v2.entities.invitation.InvitationCallback;
 import com.smartfoxserver.v2.entities.invitation.SFSInvitation;
-import com.smartfoxserver.v2.entities.variables.RoomVariable;
 import com.smartfoxserver.v2.entities.variables.SFSRoomVariable;
 import com.smartfoxserver.v2.exceptions.SFSCreateRoomException;
 import com.smartfoxserver.v2.exceptions.SFSJoinRoomException;
 import com.smartfoxserver.v2.exceptions.SFSVariableException;
-import com.smartfoxserver.v2.extensions.BaseClientRequestHandler;
 import com.smartfoxserver.v2.extensions.ExtensionLogLevel;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import km.barsim.util.BarSimConstants;
 import km.barsim.util.GameApiHelper;
+import org.apache.commons.lang.StringUtils;
 
 public class InvitationClientRequestHandler extends AbstractSFSClientRequestHandler {
 
@@ -60,25 +52,34 @@ public class InvitationClientRequestHandler extends AbstractSFSClientRequestHand
     public void handleClientRequest(User sender, ISFSObject params) {
 
         String username = params.getUtfString(BarSimConstants.INVITATION_PARAMS_USERNAME);
+        String appVersion = params.getUtfString(BarSimConstants.APP_VERSION);
+
         trace(ExtensionLogLevel.INFO, String.valueOf(sender.getName()) + " has sent an invitation message for user: " + username);
 
-        if (username != null && !username.isEmpty()) {
-
-            User receiver = helper.getUserByUserName(username);
-
-            if (receiver == null) {
-                trace(ExtensionLogLevel.INFO, String.valueOf(username) + " has not been found !");
-            } else {
-                trace(ExtensionLogLevel.INFO, String.valueOf(username) + " has been found !");
-                sendInvitation(sender, receiver);
-            }
+        if (StringUtils.isEmpty(username)) {
+            trace(ExtensionLogLevel.DEBUG, "NULL or EMPTY " + BarSimConstants.INVITATION_PARAMS_USERNAME);
+            return;
         }
+
+        if (StringUtils.isEmpty(appVersion)) {
+            trace(ExtensionLogLevel.DEBUG, "NULL or EMPTY " + BarSimConstants.APP_VERSION);
+            return;
+        }
+
+        User receiver = helper.getUserByUserName(username);
+        if (receiver == null) {
+            trace(ExtensionLogLevel.INFO, String.valueOf(username) + " has not been found !");
+            return;
+        }
+
+        trace(ExtensionLogLevel.INFO, String.valueOf(username) + " has been found !");
+        sendInvitation(sender, receiver, appVersion);
     }
 
-    private void sendInvitation(User sender, User receiver) {
+    private void sendInvitation(final User sender, final User receiver, final String appVersion) {
 
         trace(ExtensionLogLevel.INFO, "Sending invitation from " + sender.getName() + "  to " + receiver.getName());
-        SFSInvitation invitation = new SFSInvitation(sender, receiver, 50);
+        SFSInvitation invitation = new SFSInvitation(sender, receiver, BarSimConstants.INVITATION_TIMEOUT_SECONDS);
 
         helper.getGameApi().sendInvitation(invitation, new InvitationCallback() {
 
@@ -98,16 +99,27 @@ public class InvitationClientRequestHandler extends AbstractSFSClientRequestHand
 
             public void onAccepted(Invitation invitation, ISFSObject params) {
                 trace(ExtensionLogLevel.INFO, "Invitation accepted  !");
-                onAcceptedInvitation(invitation);
+                String opponentAppVersion = params.getUtfString(BarSimConstants.APP_VERSION);
+
+                if (StringUtils.isEmpty(opponentAppVersion)) {
+                    trace(ExtensionLogLevel.DEBUG, "NULL or EMPTY opponent appVersion ");
+                    return;
+                }
+                if (appVersion.equals(opponentAppVersion)) {
+                    onAcceptedInvitation(invitation);
+                } else {
+                    send(BarSimConstants.VERSIONS_DO_NOT_MATCH, new SFSObject(), sender);
+                    send(BarSimConstants.VERSIONS_DO_NOT_MATCH, new SFSObject(), receiver);
+                }
             }
         });
     }
 
     private void onAcceptedInvitation(Invitation invitation) {
-        User player2;
-        User player1 = invitation.getInviter();
+        final User player1 = invitation.getInviter();
+        final User player2 = invitation.getInvitee();
 
-        if (createPrivateRoom(player1, player2 = invitation.getInvitee())) {
+        if (createPrivateRoom(player1, player2)) {
             sendStartGame(player1, player2);
             sendStartGame(player2, player1);
             trace(ExtensionLogLevel.INFO, "Rooms in Barsim :");

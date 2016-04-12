@@ -17,5 +17,11 @@ public class BarSimConstants {
     public static final String GAME_END_COMMAND = "_gameEnd";
     public static final String GAME_CONTINUE_COMMAND = "_gameContinue";
     public static final String GAME_CONTINUE_PROPERTY = "gameContinue";
+
+    public static final int INVITATION_TIMEOUT_SECONDS = 300;
+
+    public static final String APP_VERSION = "appVersion";
+
+    public static final String VERSIONS_DO_NOT_MATCH = "differentVersions";
 }
 

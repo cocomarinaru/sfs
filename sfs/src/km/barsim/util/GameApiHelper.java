@@ -5,10 +5,7 @@ import com.smartfoxserver.v2.api.ISFSGameApi;
 import com.smartfoxserver.v2.entities.Room;
 import com.smartfoxserver.v2.entities.User;
 import com.smartfoxserver.v2.entities.Zone;
-import com.smartfoxserver.v2.entities.data.SFSObject;
-import com.smartfoxserver.v2.extensions.BaseClientRequestHandler;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class GameApiHelper {
