@@ -14,26 +14,24 @@ import java.util.Random;
 public abstract class AbstractSFSClientRequestHandler extends BaseClientRequestHandler {
 
     private static final int MAX_ID = 115;
-    private static final int MAX_RECIPES = 5;
+    private static final int MAX_RECIPES = 3;
 
     protected GameApiHelper helper  = GameApiHelper.getInstance();
 
-    protected void sendStartGame(User user, User opponent) {
+    protected void sendStartGame(User user, User opponent, List<Integer> recipieList) {
 
         user.setProperty(BarSimConstants.GAME_CONTINUE_PROPERTY, Boolean.FALSE);
         opponent.setProperty(BarSimConstants.GAME_CONTINUE_PROPERTY, Boolean.FALSE);
 
-        List<Integer> recipiesList = getRecipes();
-
         SFSObject sfsObjectWIthRecipesAndUserInfo = new SFSObject();
-        sfsObjectWIthRecipesAndUserInfo.putIntArray(BarSimConstants.RECIPES, recipiesList);
+        sfsObjectWIthRecipesAndUserInfo.putIntArray(BarSimConstants.RECIPES, recipieList);
         sfsObjectWIthRecipesAndUserInfo.putUtfString("opponentName", opponent.getName());
         sfsObjectWIthRecipesAndUserInfo.putInt("opponentId", opponent.getId());
 
         send(BarSimConstants.INVITATION_START_GAME, sfsObjectWIthRecipesAndUserInfo, user);
     }
 
-    private List<Integer> getRecipes() {
+    protected List<Integer> getRecipes() {
         ArrayList<Integer> recipesList = new ArrayList<Integer>();
 
         Random random = new Random();

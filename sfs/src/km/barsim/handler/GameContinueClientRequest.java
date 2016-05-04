@@ -7,6 +7,8 @@ import com.smartfoxserver.v2.extensions.ExtensionLogLevel;
 import km.barsim.util.BarSimConstants;
 import km.barsim.util.GameApiHelper;
 
+import java.util.List;
+
 public class GameContinueClientRequest extends AbstractSFSClientRequestHandler {
 
     public void handleClientRequest(User user, ISFSObject isfsObject) {
@@ -20,8 +22,9 @@ public class GameContinueClientRequest extends AbstractSFSClientRequestHandler {
             if (opponent != null) {
                 Boolean gameContinue = (Boolean) opponent.getProperty(BarSimConstants.GAME_CONTINUE_PROPERTY);
                 if (gameContinue) {
-                    sendStartGame(user, opponent);
-                    sendStartGame(opponent, user);
+                    List<Integer> recipes = getRecipes();
+                    sendStartGame(user, opponent, recipes);
+                    sendStartGame(opponent, user, recipes);
                 }
             } else {
                 trace(ExtensionLogLevel.INFO, "Opponent is null");

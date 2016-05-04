@@ -45,6 +45,8 @@ import km.barsim.util.BarSimConstants;
 import km.barsim.util.GameApiHelper;
 import org.apache.commons.lang.StringUtils;
 
+import java.util.List;
+
 public class InvitationClientRequestHandler extends AbstractSFSClientRequestHandler {
 
     private GameApiHelper helper = GameApiHelper.getInstance();
@@ -120,8 +122,10 @@ public class InvitationClientRequestHandler extends AbstractSFSClientRequestHand
         final User player2 = invitation.getInvitee();
 
         if (createPrivateRoom(player1, player2)) {
-            sendStartGame(player1, player2);
-            sendStartGame(player2, player1);
+
+            List<Integer> recipes = getRecipes();
+            sendStartGame(player1, player2, recipes);
+            sendStartGame(player2, player1, recipes);
             trace(ExtensionLogLevel.INFO, "Rooms in Barsim :");
             Zone barsimZone = helper.getZoneByName(BarSimConstants.ZONE_NAME);
             for (Room room : barsimZone.getRoomList()) {
