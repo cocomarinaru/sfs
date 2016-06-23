@@ -1,5 +1,8 @@
 package km.barsim.db;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.*;
 
 /**
@@ -7,9 +10,11 @@ import java.sql.*;
  */
 public class UserService {
 
-    private UserService instance;
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    public UserService getInstance(){
+    private static UserService instance;
+
+    public static UserService getInstance() {
 
         if (instance == null){
             instance = new UserService();
@@ -19,67 +24,64 @@ public class UserService {
     }
 
     private UserService(){
-
     }
 
+    public int getUserId(String userName) {
 
-    public void getUserRating(String userName){
+        int defaultId = 0;
 
         Connection connection = DatabaseConnector.getConnection();
 
         try {
 
-            String sql = "select COUNT(*) as count from user_score_summary" ;
+            String sql = "SELECT id FROM user WHERE username = '?' LIMIT 1";
             PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, userName);
             ResultSet rs = ps.executeQuery();
-            int count = rs.getInt("count");
-
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
 
         } catch (SQLException e) {
 
         }
-
+        return defaultId;
     }
 
 
-//
-//    public function getTier()
-//    {
-//        // Connect to DB
-//        $con = Propel::getServiceContainer()->getReadConnection(UserTableMap::DATABASE_NAME);
-//
-//        // Count number of users
-//        $sql = "select COUNT(*) as count from user_score_summary";
-//        $stmt = $con->prepare($sql);
-//        $stmt->execute();
-//        $row = $stmt->fetch(\PDO::FETCH_OBJ);
-//        $count = $row->count;
-//
-//		/*
-//		* $this->id e id-ul userului si se citeste din DB din tabela user
-//
-//		SELECT id FROM user WHERE username = 'user' LIMIT 1
-//		*/
-//
-//        // Calculeaza un ranking direct in SQL
-//        $sql = "
-//        SELECT x.user_id, x.position, x.h2h_score
-//        FROM (SELECT t.user_id, t.h2h_score, @rownum := @rownum + 1 AS position
-//        FROM user_score_summary t
-//        JOIN (SELECT @rownum := 0) r
-//        ORDER BY t.h2h_score DESC) x
-//        WHERE x.user_id = '" . $this->id ."'";
-//
-//        $stmt = $con->prepare($sql);
-//        $stmt->execute();
-//        $row = $stmt->fetch(\PDO::FETCH_OBJ);
-//
-//        // asta e rank-ul
-//        var_dump ( $row->position );
-//    }
+    public int getUserRank(String userName) {
+
+        int defaultRank = 0;
+        Connection connection = DatabaseConnector.getConnection();
+
+        try {
+
+            int userId = getUserId(userName);
+            String sql = "SELECT x.user_id, x.position, x.h2h_score " +
+                    " FROM (SELECT t.user_id, t.h2h_score, @rownum := @rownum + 1 AS position " +
+                    " FROM user_score_summary t " +
+                    " JOIN (SELECT @rownum := 0) r " +
+                    " ORDER BY t.h2h_score DESC) x " +
+                    " WHERE x.user_id = '?;";
+
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("position");
+            }
 
 
+        } catch (SQLException e) {
+            logger.error("Error getting rank for user" + userName, e);
+        } finally {
 
 
+        }
+
+        return defaultRank;
+
+    }
 
 }
