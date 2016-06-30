@@ -1,6 +1,8 @@
 package km.barsim.db;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 /**
  * Created by ovidiu on 23.06.2016.
@@ -8,29 +10,17 @@ import java.sql.*;
 public class DatabaseConnector {
 
     private static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-    private static final String DB_URL = "jdbc:mysql://localhost/EMP";
 
-    private static final String USER = "username";
-    private static final String PASS = "password";
+    private DBConfig config = DBConfig.getInstance();
 
-    private static Connection connection;
 
-    public static Connection getConnection() {
-
-        if (connection == null) {
-            connection = connect();
-        }
-
-        return connection;
-    }
-
-    private static Connection connect() {
+    public Connection getConnection() {
         Connection conn;
 
         try {
             Class.forName(JDBC_DRIVER);
 
-            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn = DriverManager.getConnection(config.getDbUrl(), config.getUsername(), config.getPassword());
 
         } catch (ClassNotFoundException e) {
             return null;
@@ -40,7 +30,7 @@ public class DatabaseConnector {
         return conn;
     }
 
-    public static void closeConnection(){
+    public void closeConnection() {
 
         try {
             connection.close();

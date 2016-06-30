@@ -2,6 +2,7 @@ package km.barsim.util;
 
 import com.smartfoxserver.v2.SmartFoxServer;
 import com.smartfoxserver.v2.api.ISFSGameApi;
+import com.smartfoxserver.v2.db.DBConfig;
 import com.smartfoxserver.v2.entities.Room;
 import com.smartfoxserver.v2.entities.User;
 import com.smartfoxserver.v2.entities.Zone;
@@ -47,6 +48,13 @@ public class GameApiHelper {
         return null;
     }
 
+    public SmartFoxServer getServerInstance() {
+        return serverInstance;
+    }
 
+
+    public DBConfig getZoneDbConfig(String zoneName){
+        return serverInstance.getConfigurator().getZoneSetting(zoneName).databaseManager;
+    }
 }
 

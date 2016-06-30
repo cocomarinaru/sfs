@@ -16,25 +16,25 @@ public class UserService {
 
     public static UserService getInstance() {
 
-        if (instance == null){
+        if (instance == null) {
             instance = new UserService();
         }
 
         return instance;
     }
 
-    private UserService(){
+    private UserService() {
     }
 
     public int getUserId(String userName) {
 
         int defaultId = 0;
 
-        Connection connection = DatabaseConnector.getConnection();
+        Connection connection = new DatabaseConnector().getConnection();
 
         try {
 
-            String sql = "SELECT id FROM user WHERE username = '?' LIMIT 1";
+            String sql = "SELECT id FROM user WHERE username = ? LIMIT 1";
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, userName);
             ResultSet rs = ps.executeQuery();
@@ -42,8 +42,18 @@ public class UserService {
                 return rs.getInt("id");
             }
 
-        } catch (SQLException e) {
 
+        } catch (SQLException e) {
+            logger.error("Error getting id for user " + userName, e);
+        }
+        finally {
+            try {
+                if(connection!=null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                logger.error("Error closing connection", e);
+            }
         }
         return defaultId;
     }
@@ -52,7 +62,7 @@ public class UserService {
     public int getUserRank(String userName) {
 
         int defaultRank = 0;
-        Connection connection = DatabaseConnector.getConnection();
+        Connection connection = new DatabaseConnector().getConnection();
 
         try {
 
@@ -62,10 +72,12 @@ public class UserService {
                     " FROM user_score_summary t " +
                     " JOIN (SELECT @rownum := 0) r " +
                     " ORDER BY t.h2h_score DESC) x " +
-                    " WHERE x.user_id = '?;";
+                    " WHERE x.user_id = ?";
 
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setInt(1, userId);
+
+
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
@@ -77,11 +89,16 @@ public class UserService {
             logger.error("Error getting rank for user" + userName, e);
         } finally {
 
+            if(connection != null){
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    logger.error("Error closing connection", e);
+                }
+            }
 
         }
-
         return defaultRank;
-
     }
 
 }
