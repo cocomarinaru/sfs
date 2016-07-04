@@ -24,15 +24,6 @@ public class BarsimExtension extends SFSExtension {
         addEventHandler(SFSEventType.USER_JOIN_ROOM, UserRankHandler.class);
 
         addEventHandler(SFSEventType.USER_LOGIN, UserRankHandler.class);
-//        addFilter("userRankfilter", new UserRankFilter());
-//
-//        getParentZone().resetSystemFilterChain();
-//
-//        ISystemFilterChain filterChain = new SysControllerFilterChain();
-//        filterChain.addFilter("f", new SystemFilter("JoinRoom"));
-//        getParentZone().setFilterChain(SystemRequest.JoinRoom, filterChain);
-//
-
 
     }
 }
