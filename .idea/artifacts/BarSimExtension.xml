@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="BarSimExtension">
-    <output-path>$PROJECT_DIR$/out/artifacts/BarSimExtension</output-path>
+    <output-path>$PROJECT_DIR$/sfs/out</output-path>
     <root id="archive" name="BarSimExtension.jar">
       <element id="module-output" name="sfs" />
     </root>

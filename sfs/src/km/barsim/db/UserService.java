@@ -10,7 +10,7 @@ import java.sql.*;
  */
 public class UserService {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+    protected final Logger logger = LoggerFactory.getLogger("Extensions");
 
     private static UserService instance;
 
@@ -30,7 +30,7 @@ public class UserService {
 
         int defaultId = 0;
 
-        Connection connection = new DatabaseConnector().getConnection();
+        Connection connection = DatabaseConnector.getInstance().getConnection();
 
         try {
 
@@ -62,7 +62,7 @@ public class UserService {
     public int getUserRank(String userName) {
 
         int defaultRank = 0;
-        Connection connection = new DatabaseConnector().getConnection();
+        Connection connection = DatabaseConnector.getInstance().getConnection();
 
         try {
 

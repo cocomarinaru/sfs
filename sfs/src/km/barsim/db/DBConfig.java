@@ -11,6 +11,7 @@ public class DBConfig {
     private final String dbUrl;
     private final String username;
     private final String password;
+    private final String driver;
 
     private static DBConfig instance;
 
@@ -31,6 +32,7 @@ public class DBConfig {
         dbUrl = config.connectionString;
         username = config.userName;
         password = config.password;
+        driver = config.driverName;
 
     }
 
@@ -44,5 +46,9 @@ public class DBConfig {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getDriver() {
+        return driver;
     }
 }
