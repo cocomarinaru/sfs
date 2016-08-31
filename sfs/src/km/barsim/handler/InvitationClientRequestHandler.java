@@ -70,7 +70,8 @@ public class InvitationClientRequestHandler extends AbstractSFSClientRequestHand
 
         User receiver = helper.getUserByUserName(username);
         if (receiver == null) {
-            trace(ExtensionLogLevel.INFO, String.valueOf(username) + " has not been found !");
+            trace(ExtensionLogLevel.ERROR, String.valueOf(username) + " has not been found !");
+            helper.disconnectGhostUser(username);
             return;
         }
 
